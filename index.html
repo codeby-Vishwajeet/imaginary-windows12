@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Windows 12 — Concept</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Lexend:wght@300;400;500;600;700&display=swap');
+
+  :root{
+    --accent1:#5B8CFF;
+    --accent2:#9B6BFF;
+    --accent3:#37C7B8;
+    --glass-bg: rgba(20,24,38,0.55);
+    --glass-bg-strong: rgba(16,19,32,0.78);
+    --glass-border: rgba(255,255,255,0.14);
+    --glass-border-strong: rgba(255,255,255,0.22);
+    --text-primary:#F3F5FA;
+    --text-secondary:#AEB6CC;
+    --text-tertiary:#7C84A0;
+    --radius-lg:20px;
+    --radius-md:14px;
+    --radius-sm:10px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{
+    width:100%; height:100%; overflow:hidden;
+    font-family:'Inter', system-ui, sans-serif;
+    color:var(--text-primary);
+    -webkit-font-smoothing:antialiased;
+  }
+  body{ position:relative; height:100vh; width:100vw; }
+
+  /* ---------- desktop wallpaper ---------- */
+  #wallpaper{
+    position:absolute; inset:0; z-index:0;
+    background: linear-gradient(160deg, #0a0e1f 0%, #131a36 28%, #1c2b5c 52%, #2a3f7e 72%, #3a4f96 100%);
+    overflow:hidden;
+    transition: background 1.2s ease;
+  }
+  #wallpaper.evening{
+    background: linear-gradient(160deg, #1a0f2e 0%, #2c1452 25%, #531d63 50%, #9a3b5a 75%, #e2693f 100%);
+  }
+  #wallpaper.morning{
+    background: linear-gradient(160deg, #0c1b3a 0%, #163league 100%);
+    background: linear-gradient(160deg, #0c1b3a 0%, #1b3a6b 30%, #4779b5 60%, #9fc2e8 85%, #f4d9a8 100%);
+  }
+  .blob{
+    position:absolute; border-radius:50%; filter:blur(60px); opacity:0.55;
+    animation: drift 26s ease-in-out infinite;
+  }
+  .blob1{ width:520px; height:520px; background:radial-gradient(circle, var(--accent1), transparent 70%); top:-120px; left:-80px; animation-delay:0s;}
+  .blob2{ width:600px; height:600px; background:radial-gradient(circle, var(--accent2), transparent 70%); bottom:-160px; right:-120px; animation-delay:-8s;}
+  .blob3{ width:380px; height:380px; background:radial-gradient(circle, var(--accent3), transparent 70%); top:30%; left:40%; animation-delay:-15s;}
+  @keyframes drift{
+    0%,100%{ transform:translate(0,0) scale(1); }
+    33%{ transform:translate(40px,-30px) scale(1.08); }
+    66%{ transform:translate(-30px,25px) scale(0.95); }
+  }
+  .grain{
+    position:absolute; inset:0; opacity:0.035; pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- desktop icons ---------- */
+  #desktop-icons{
+    position:absolute; top:24px; left:24px; z-index:2;
+    display:grid; grid-template-columns: repeat(1, 84px); gap:6px;
+  }
+  .dicon{
+    width:84px; height:88px; border-radius:var(--radius-sm);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:6px; cursor:pointer; user-select:none; -webkit-user-select:none;
+    transition: background .12s ease;
+  }
+  .dicon:hover{ background:rgba(255,255,255,0.08); }
+  .dicon.selected{ background:rgba(91,140,255,0.28); outline:1px solid rgba(91,140,255,0.5); }
+  .dicon .ico{
+    width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    font-size:19px; color:white; box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  }
+  .dicon .lbl{
+    font-size:11.5px; color:white; text-shadow:0 1px 3px rgba(0,0,0,0.6); text-align:center;
+    line-height:1.25; max-width:80px;
+  }
+
+  /* ---------- top status (only shown when widgets/notif open use overlay, but quick clock corner) ---------- */
+
+  /* ---------- taskbar ---------- */
+  #taskbar-wrap{
+    position:absolute; bottom:10px; left:0; right:0; z-index:50;
+    display:flex; justify-content:center; pointer-events:none;
+  }
+  #taskbar{
+    pointer-events:auto;
+    display:flex; align-items:center; gap:4px;
+    background:var(--glass-bg-strong);
+    border:1px solid var(--glass-border-strong);
+    backdrop-filter:blur(28px) saturate(160%);
+    -webkit-backdrop-filter:blur(28px) saturate(160%);
+    border-radius:18px;
+    padding:7px 10px;
+    box-shadow:0 12px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .tb-group{ display:flex; align-items:center; gap:4px; }
+  .tb-sep{ width:1px; height:26px; background:rgba(255,255,255,0.12); margin:0 6px; }
+  .tb-btn{
+    width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; position:relative; transition:background .15s, transform .1s; color:var(--text-primary);
+    font-size:19px;
+  }
+  .tb-btn:hover{ background:rgba(255,255,255,0.1); }
+  .tb-btn:active{ transform:scale(0.92); }
+  .tb-btn.active-app::after{
+    content:''; position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
+    width:5px; height:5px; border-radius:50%; background:var(--accent1);
+  }
+  .tb-start{
+    width:46px; height:46px; border-radius:13px;
+    background:linear-gradient(135deg, var(--accent1), var(--accent2));
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    box-shadow:0 4px 14px rgba(91,140,255,0.35);
+    transition:transform .12s, box-shadow .15s;
+  }
+  .tb-start:hover{ box-shadow:0 6px 20px rgba(91,140,255,0.55); transform:translateY(-1px); }
+  .tb-start svg{ width:20px; height:20px; }
+  .tb-search{
+    display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:0 14px; height:44px;
+    width:220px; cursor:pointer; transition:background .15s, width .2s;
+    color:var(--text-secondary); font-size:13.5px;
+  }
+  .tb-search:hover{ background:rgba(255,255,255,0.11); }
+  .tb-copilot{
+    width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; position:relative; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+  }
+  .copilot-orb{
+    width:22px; height:22px; border-radius:50%;
+    background:conic-gradient(from 90deg, var(--accent1), var(--accent2), var(--accent3), var(--accent1));
+    animation: spin 5s linear infinite, pulse 2.6s ease-in-out infinite;
+    filter:saturate(1.3);
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  @keyframes pulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(155,107,255,0.4);} 50%{ box-shadow:0 0 14px 4px rgba(155,107,255,0.45);} }
+  .tb-tray{
+    display:flex; align-items:center; gap:10px; padding:0 12px; height:44px; border-radius:13px;
+    cursor:pointer; transition:background .15s; font-size:12.5px; color:var(--text-secondary);
+  }
+  .tb-tray:hover{ background:rgba(255,255,255,0.1); }
+  .tb-clock{
+    display:flex; flex-direction:column; align-items:flex-end; padding:4px 12px; height:44px; justify-content:center;
+    border-radius:13px; cursor:pointer; transition:background .15s;
+  }
+  .tb-clock:hover{ background:rgba(255,255,255,0.1); }
+  .tb-clock .time{ font-size:13px; font-weight:500; line-height:1.25; }
+  .tb-clock .date{ font-size:11px; color:var(--text-secondary); line-height:1.25; }
+
+  /* taskbar icon glyph helper */
+  .glyph{ width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
+
+  /* ---------- Start menu ---------- */
+  #start-overlay{
+    position:absolute; inset:0; z-index:60; background:rgba(5,7,14,0.25);
+    display:none; align-items:flex-end; justify-content:center; padding-bottom:78px;
+  }
+  #start-overlay.open{ display:flex; }
+  #start-menu{
+    width:680px; max-height:640px;
+    background:var(--glass-bg-strong);
+    border:1px solid var(--glass-border-strong);
+    backdrop-filter:blur(34px) saturate(170%);
+    -webkit-backdrop-filter:blur(34px) saturate(170%);
+    border-radius:var(--radius-lg);
+    box-shadow:0 24px 70px rgba(0,0,0,0.55);
+    padding:26px 28px 20px;
+    display:flex; flex-direction:column; gap:18px;
+    animation: rise .22s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes rise{ from{ opacity:0; transform:translateY(16px) scale(0.98); } to{ opacity:1; transform:translateY(0) scale(1); } }
+  .start-search{
+    display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:0 14px; height:42px;
+    color:var(--text-secondary); font-size:13.5px;
+  }
+  .start-section-title{
+    font-size:12.5px; color:var(--text-secondary); font-weight:500; display:flex; justify-content:space-between; align-items:center;
+  }
+  .start-section-title span.link{ color:var(--text-tertiary); font-size:12px; cursor:pointer; }
+  .start-section-title span.link:hover{ color:var(--text-primary); }
+  .pinned-grid{
+    display:grid; grid-template-columns:repeat(6,1fr); gap:8px;
+  }
+  .pin-app{
+    display:flex; flex-direction:column; align-items:center; gap:7px; padding:10px 4px;
+    border-radius:var(--radius-sm); cursor:pointer; transition:background .12s;
+  }
+  .pin-app:hover{ background:rgba(255,255,255,0.08); }
+  .pin-app .ico{
+    width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    font-size:18px; color:white;
+  }
+  .pin-app .lbl{ font-size:11px; color:var(--text-primary); text-align:center; line-height:1.2; }
+  .rec-list{ display:flex; flex-direction:column; gap:2px; }
+  .rec-item{
+    display:flex; align-items:center; gap:12px; padding:8px 10px; border-radius:var(--radius-sm);
+    cursor:pointer; transition:background .12s;
+  }
+  .rec-item:hover{ background:rgba(255,255,255,0.08); }
+  .rec-item .ico{ width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:14px; flex-shrink:0; }
+  .rec-item .meta .t{ font-size:13px; color:var(--text-primary); }
+  .rec-item .meta .s{ font-size:11.5px; color:var(--text-tertiary); }
+  .start-footer{
+    display:flex; align-items:center; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.08);
+    padding-top:14px; margin-top:4px;
+  }
+  .acct-chip{ display:flex; align-items:center; gap:10px; cursor:pointer; padding:6px 10px; border-radius:10px; transition:background .12s;}
+  .acct-chip:hover{ background:rgba(255,255,255,0.08); }
+  .avatar{
+    width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,var(--accent2),var(--accent1));
+    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600;
+  }
+  .power-btn{ width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .12s; font-size:16px; }
+  .power-btn:hover{ background:rgba(255,255,255,0.08); }
+
+  /* ---------- widgets panel ---------- */
+  #widgets-overlay{
+    position:absolute; inset:0; z-index:60; background:rgba(5,7,14,0.2);
+    display:none; align-items:flex-end; justify-content:flex-start; padding:0 0 78px 12px;
+  }
+  #widgets-overlay.open{ display:flex; }
+  #widgets-panel{
+    width:380px; max-height:660px; overflow-y:auto;
+    background:var(--glass-bg-strong); border:1px solid var(--glass-border-strong);
+    backdrop-filter:blur(30px) saturate(170%); -webkit-backdrop-filter:blur(30px) saturate(170%);
+    border-radius:var(--radius-lg); box-shadow:0 24px 70px rgba(0,0,0,0.5);
+    padding:18px; display:flex; flex-direction:column; gap:14px;
+    animation: slideup .22s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes slideup{ from{ opacity:0; transform:translateY(20px); } to{ opacity:1; transform:translateY(0); } }
+  .widget-card{
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+    border-radius:var(--radius-md); padding:16px;
+  }
+  .widget-card .wt{ font-size:12.5px; color:var(--text-secondary); margin-bottom:8px; display:flex; justify-content:space-between; }
+  .weather-big{ display:flex; align-items:center; justify-content:space-between; }
+  .weather-big .temp{ font-size:34px; font-weight:300; }
+  .weather-big .cond{ font-size:12.5px; color:var(--text-secondary); }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; text-align:center; font-size:11px; }
+  .cal-grid .dow{ color:var(--text-tertiary); padding-bottom:4px; }
+  .cal-grid .d{ padding:5px 0; border-radius:8px; color:var(--text-secondary); }
+  .cal-grid .d.today{ background:var(--accent1); color:white; font-weight:600; }
+  .stock-row{ display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:12.5px; }
+  .stock-up{ color:#5ddba3; } .stock-down{ color:#ef7b7b; }
+  .news-item{ padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.06); }
+  .news-item:last-child{ border-bottom:none; }
+  .news-item .nt{ font-size:12.5px; color:var(--text-primary); line-height:1.4; }
+  .news-item .ns{ font-size:10.5px; color:var(--text-tertiary); margin-top:3px; }
+
+  /* ---------- quick settings ---------- */
+  #qs-overlay{
+    position:absolute; inset:0; z-index:60; background:rgba(5,7,14,0.2);
+    display:none; align-items:flex-end; justify-content:flex-end; padding:0 12px 78px 0;
+  }
+  #qs-overlay.open{ display:flex; }
+  #qs-panel{
+    width:340px; background:var(--glass-bg-strong); border:1px solid var(--glass-border-strong);
+    backdrop-filter:blur(30px) saturate(170%); -webkit-backdrop-filter:blur(30px) saturate(170%);
+    border-radius:var(--radius-lg); box-shadow:0 24px 70px rgba(0,0,0,0.5);
+    padding:18px; display:flex; flex-direction:column; gap:14px;
+    animation: slideup .2s cubic-bezier(.2,.8,.2,1);
+  }
+  .qs-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .qs-tile{
+    background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-sm);
+    padding:12px 8px; display:flex; flex-direction:column; align-items:center; gap:7px; cursor:pointer;
+    transition:background .15s; font-size:11px; color:var(--text-secondary); text-align:center;
+  }
+  .qs-tile:hover{ background:rgba(255,255,255,0.1); }
+  .qs-tile.on{ background:rgba(91,140,255,0.22); border-color:rgba(91,140,255,0.4); color:var(--text-primary); }
+  .qs-tile .ic{ font-size:18px; }
+  .qs-slider-row{ display:flex; align-items:center; gap:10px; }
+  .qs-slider-row .ic{ font-size:15px; color:var(--text-secondary); width:18px; text-align:center; }
+  .qs-slider-row input[type=range]{ flex:1; }
+  .qs-batt{ display:flex; align-items:center; justify-content:space-between; font-size:12.5px; color:var(--text-secondary); }
+
+  input[type=range]{
+    -webkit-appearance:none; height:4px; border-radius:4px; background:rgba(255,255,255,0.15); outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:white; cursor:pointer;
+    box-shadow:0 1px 4px rgba(0,0,0,0.4);
+  }
+
+  /* ---------- generic window ---------- */
+  .win{
+    position:absolute; min-width:340px; min-height:220px;
+    background:rgba(22,26,42,0.92); border:1px solid rgba(255,255,255,0.1);
+    border-radius:var(--radius-md); overflow:hidden; z-index:10;
+    box-shadow:0 18px 60px rgba(0,0,0,0.5);
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    display:flex; flex-direction:column;
+    animation: openwin .18s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes openwin{ from{ opacity:0; transform:scale(0.96); } to{ opacity:1; transform:scale(1); } }
+  .win-titlebar{
+    height:40px; display:flex; align-items:center; justify-content:space-between; padding:0 6px 0 14px;
+    cursor:move; background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.06); user-select:none;
+  }
+  .win-title{ font-size:12.5px; color:var(--text-secondary); display:flex; align-items:center; gap:8px; }
+  .win-controls{ display:flex; }
+  .win-ctrl-btn{ width:42px; height:38px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-secondary); font-size:13px; transition:background .12s; }
+  .win-ctrl-btn:hover{ background:rgba(255,255,255,0.08); }
+  .win-ctrl-btn.close:hover{ background:#e5484d; color:white; }
+  .win-body{ flex:1; overflow:auto; padding:18px 20px; font-size:13px; color:var(--text-secondary); line-height:1.6; }
+  .win-body h3{ color:var(--text-primary); font-size:15px; margin-bottom:8px; font-weight:600; }
+  .win.snapped-left{ top:14px !important; left:14px !important; width:calc(50vw - 21px) !important; height:calc(100vh - 100px) !important; }
+  .win.snapped-right{ top:14px !important; left:calc(50vw + 7px) !important; width:calc(50vw - 21px) !important; height:calc(100vh - 100px) !important; }
+
+  .snap-hint{
+    position:absolute; top:14px; z-index:9; width:160px; height:120px;
+    border:2px solid rgba(91,140,255,0.6); border-radius:10px; background:rgba(91,140,255,0.12);
+    display:none; align-items:center; justify-content:center; font-size:11px; color:#cdd9ff; pointer-events:none;
+  }
+
+  ::-webkit-scrollbar{ width:8px; height:8px; }
+  ::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.15); border-radius:8px; }
+  ::-webkit-scrollbar-track{ background:transparent; }
+
+  .toast{
+    position:absolute; top:20px; right:20px; z-index:80;
+    background:var(--glass-bg-strong); border:1px solid var(--glass-border-strong);
+    backdrop-filter:blur(24px); border-radius:var(--radius-md); padding:14px 16px; width:300px;
+    box-shadow:0 14px 40px rgba(0,0,0,0.4); display:flex; gap:12px; align-items:flex-start;
+    animation: toastin .25s ease, toastout .3s ease 3.2s forwards;
+  }
+  @keyframes toastin{ from{ opacity:0; transform:translateX(40px);} to{ opacity:1; transform:translateX(0);} }
+  @keyframes toastout{ to{ opacity:0; transform:translateX(40px); } }
+  .toast .ti{ width:32px; height:32px; border-radius:9px; background:linear-gradient(135deg,var(--accent1),var(--accent2)); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:15px; }
+  .toast .tt{ font-size:12.5px; font-weight:600; margin-bottom:2px; }
+  .toast .ts{ font-size:11.5px; color:var(--text-secondary); line-height:1.4; }
+
+  .hint-banner{
+    position:absolute; top:18px; left:50%; transform:translateX(-50%); z-index:5;
+    background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter:blur(16px); border-radius:30px; padding:8px 18px; font-size:12px; color:var(--text-secondary);
+    display:flex; align-items:center; gap:8px;
+  }
+</style>
+</head>
+<body>
+
+<div id="wallpaper">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+  <div class="grain"></div>
+</div>
+
+<div class="hint-banner" id="hintBanner">✦ Concept build — click Start, search, open Settings, drag windows to screen edges to snap</div>
+
+<div id="desktop-icons">
+  <div class="dicon" onclick="selectIcon(this)" ondblclick="openWindow('recycle')">
+    <div class="ico" style="background:linear-gradient(135deg,#6b7280,#9ca3af);">🗑</div>
+    <div class="lbl">Recycle Bin</div>
+  </div>
+  <div class="dicon" onclick="selectIcon(this)" ondblclick="openWindow('explorer')">
+    <div class="ico" style="background:linear-gradient(135deg,#3a7bd5,#2a5298);">📁</div>
+    <div class="lbl">This PC</div>
+  </div>
+  <div class="dicon" onclick="selectIcon(this)" ondblclick="openWindow('settings')">
+    <div class="ico" style="background:linear-gradient(135deg,#5B8CFF,#9B6BFF);">⚙</div>
+    <div class="lbl">Settings</div>
+  </div>
+  <div class="dicon" onclick="selectIcon(this)" ondblclick="openWindow('notes')">
+    <div class="ico" style="background:linear-gradient(135deg,#f6c453,#f08a3c);">📝</div>
+    <div class="lbl">Sticky Notes</div>
+  </div>
+</div>
+
+<div id="windows-layer"></div>
+<div class="snap-hint" id="snapLeft" style="left:14px;"></div>
+<div class="snap-hint" id="snapRight" style="right:14px;"></div>
+
+<!-- Start menu -->
+<div id="start-overlay" onclick="if(event.target===this) closeAllOverlays()">
+  <div id="start-menu" onclick="event.stopPropagation()">
+    <div class="start-search" onclick="this.querySelector('input').focus()">
+      <span>🔍</span>
+      <input id="startSearchInput" placeholder="Search apps, files, and the web" oninput="filterStart(this.value)"
+        style="background:transparent;border:none;outline:none;color:var(--text-primary);font-size:13.5px;width:100%;font-family:inherit;">
+    </div>
+
+    <div>
+      <div class="start-section-title"><span>Pinned</span><span class="link" onclick="toast('All apps','Full app list would open here.')">All apps ›</span></div>
+      <div class="pinned-grid" id="pinnedGrid"></div>
+    </div>
+
+    <div>
+      <div class="start-section-title"><span>Recommended</span><span class="link" onclick="toast('Recent activity','Your full activity history would open here.')">More ›</span></div>
+      <div class="rec-list" id="recList"></div>
+    </div>
+
+    <div class="start-footer">
+      <div class="acct-chip" onclick="toast('Account','Account settings would open here.')">
+        <div class="avatar">YOU</div>
+        <span style="font-size:13px;">You</span>
+      </div>
+      <div style="display:flex; gap:4px;">
+        <div class="power-btn" title="Power" onclick="toast('Power menu','Sleep, restart, and shut down options would appear here.')">⏻</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Widgets -->
+<div id="widgets-overlay" onclick="if(event.target===this) closeAllOverlays()">
+  <div id="widgets-panel" onclick="event.stopPropagation()">
+    <div class="widget-card">
+      <div class="wt"><span>Patna</span><span id="widgetClock"></span></div>
+      <div class="weather-big">
+        <div>
+          <div class="temp">31°</div>
+          <div class="cond">Partly cloudy · feels like 34°</div>
+        </div>
+        <div style="font-size:40px;">⛅</div>
+      </div>
+    </div>
+    <div class="widget-card">
+      <div class="wt"><span>Calendar</span><span id="widgetMonth"></span></div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="widget-card">
+      <div class="wt"><span>Watchlist</span><span>Markets</span></div>
+      <div id="stockList"></div>
+    </div>
+    <div class="widget-card">
+      <div class="wt"><span>For you</span><span>News</span></div>
+      <div class="news-item"><div class="nt">Concept OS design language moves toward calmer, glass-forward surfaces</div><div class="ns">Design Weekly · 2h ago</div></div>
+      <div class="news-item"><div class="nt">On-device assistants now handle multi-step desktop tasks end to end</div><div class="ns">Tech Daily · 5h ago</div></div>
+      <div class="news-item"><div class="nt">Battery efficiency gains push thin laptops past 20 hours of use</div><div class="ns">Hardware Notes · 1d ago</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick settings -->
+<div id="qs-overlay" onclick="if(event.target===this) closeAllOverlays()">
+  <div id="qs-panel" onclick="event.stopPropagation()">
+    <div class="qs-grid">
+      <div class="qs-tile on" id="qsWifi" onclick="toggleTile(this,'Wi-Fi')"><span class="ic">📶</span>Wi-Fi</div>
+      <div class="qs-tile" id="qsBt" onclick="toggleTile(this,'Bluetooth')"><span class="ic">🔵</span>Bluetooth</div>
+      <div class="qs-tile on" id="qsFocus" onclick="toggleTile(this,'Focus')"><span class="ic">🌙</span>Focus</div>
+      <div class="qs-tile" id="qsAirplane" onclick="toggleTile(this,'Airplane mode')"><span class="ic">✈</span>Airplane</div>
+      <div class="qs-tile on" id="qsBattSaver" onclick="toggleTile(this,'Battery saver')"><span class="ic">🔋</span>Battery saver</div>
+      <div class="qs-tile" id="qsAccess" onclick="toggleTile(this,'Accessibility')"><span class="ic">♿</span>Accessibility</div>
+    </div>
+    <div class="qs-slider-row">
+      <span class="ic">🔆</span>
+      <input type="range" min="0" max="100" value="72" id="brightSlider" oninput="document.getElementById('brightOut').textContent=this.value+'%'">
+      <span id="brightOut" style="font-size:11.5px;color:var(--text-secondary);width:34px;">72%</span>
+    </div>
+    <div class="qs-slider-row">
+      <span class="ic">🔊</span>
+      <input type="range" min="0" max="100" value="55" id="volSlider" oninput="document.getElementById('volOut').textContent=this.value+'%'">
+      <span id="volOut" style="font-size:11.5px;color:var(--text-secondary);width:34px;">55%</span>
+    </div>
+    <div class="qs-batt">
+      <span>Battery — 86%</span>
+      <span style="color:var(--text-tertiary);">5h 40m remaining</span>
+    </div>
+    <div style="display:flex; gap:8px; border-top:1px solid rgba(255,255,255,0.08); padding-top:12px;">
+      <div class="qs-tile" style="flex:1;" onclick="openWindow('settings');closeAllOverlays();"><span class="ic">⚙</span>All settings</div>
+      <div class="qs-tile" style="flex:1;" onclick="toast('Power','Sleep, restart, and shut down options would appear here.')"><span class="ic">⏻</span>Power</div>
+    </div>
+  </div>
+</div>
+
+<!-- Taskbar -->
+<div id="taskbar-wrap">
+  <div id="taskbar">
+    <div class="tb-start" onclick="toggleOverlay('start-overlay')" title="Start">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="9" height="9" rx="2" fill="white"/><rect x="13" y="2" width="9" height="9" rx="2" fill="white" opacity="0.85"/><rect x="2" y="13" width="9" height="9" rx="2" fill="white" opacity="0.85"/><rect x="13" y="13" width="9" height="9" rx="2" fill="white" opacity="0.7"/></svg>
+    </div>
+    <div class="tb-search" onclick="toggleOverlay('start-overlay'); setTimeout(()=>document.getElementById('startSearchInput').focus(),60)">
+      <span>🔍</span><span>Search</span>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-group">
+      <div class="tb-btn active-app" title="File Explorer" onclick="openWindow('explorer')"><span class="glyph">📁</span></div>
+      <div class="tb-btn" title="Edge" onclick="openWindow('browser')"><span class="glyph">🌐</span></div>
+      <div class="tb-btn" title="Mail" onclick="openWindow('mail')"><span class="glyph">✉</span></div>
+      <div class="tb-btn" title="Settings" onclick="openWindow('settings')"><span class="glyph">⚙</span></div>
+      <div class="tb-btn" title="Photos" onclick="openWindow('photos')"><span class="glyph">🖼</span></div>
+      <div class="tb-btn" title="Store" onclick="openWindow('store')"><span class="glyph">🛍</span></div>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-copilot" onclick="openWindow('copilot')" title="Copilot">
+      <div class="copilot-orb"></div>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-tray" onclick="toggleOverlay('widgets-overlay')" title="Widgets">📰 22°</div>
+    <div class="tb-tray" onclick="toggleOverlay('qs-overlay')" title="Quick settings">📶 🔊 🔋</div>
+    <div class="tb-clock" onclick="toggleOverlay('widgets-overlay')">
+      <div class="time" id="clockTime">--:--</div>
+      <div class="date" id="clockDate">---</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let zTop = 10;
+let iconSelected = null;
+
+function selectIcon(el){
+  if(iconSelected) iconSelected.classList.remove('selected');
+  el.classList.add('selected'); iconSelected = el;
+}
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.dicon')){ if(iconSelected){ iconSelected.classList.remove('selected'); iconSelected=null; } }
+});
+
+function closeAllOverlays(){
+  document.getElementById('start-overlay').classList.remove('open');
+  document.getElementById('widgets-overlay').classList.remove('open');
+  document.getElementById('qs-overlay').classList.remove('open');
+}
+function toggleOverlay(id){
+  const el = document.getElementById(id);
+  const willOpen = !el.classList.contains('open');
+  closeAllOverlays();
+  if(willOpen) el.classList.add('open');
+}
+
+/* clock */
+function pad(n){ return n.toString().padStart(2,'0'); }
+function tick(){
+  const now = new Date();
+  const h = now.getHours();
+  const timeStr = pad(((h+11)%12)+1) + ':' + pad(now.getMinutes()) + ' ' + (h>=12?'PM':'AM');
+  const dateStr = now.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('clockTime').textContent = timeStr;
+  document.getElementById('clockDate').textContent = dateStr;
+  const wc = document.getElementById('widgetClock'); if(wc) wc.textContent = timeStr;
+
+  const wp = document.getElementById('wallpaper');
+  wp.classList.remove('evening','morning');
+  if(h>=18 || h<5) wp.classList.add('evening');
+  else if(h<10) wp.classList.add('morning');
+}
+tick(); setInterval(tick, 1000*15);
+
+/* calendar widget */
+(function buildCal(){
+  const now = new Date();
+  const monthEl = document.getElementById('widgetMonth');
+  if(monthEl) monthEl.textContent = now.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+  const grid = document.getElementById('calGrid');
+  if(!grid) return;
+  const dows = ['S','M','T','W','T','F','S'];
+  dows.forEach(d=>{ const e=document.createElement('div'); e.className='dow'; e.textContent=d; grid.appendChild(e); });
+  const first = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startDay = first.getDay();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  for(let i=0;i<startDay;i++){ grid.appendChild(document.createElement('div')); }
+  for(let d=1; d<=daysInMonth; d++){
+    const e = document.createElement('div'); e.className='d'; e.textContent=d;
+    if(d===now.getDate()) e.classList.add('today');
+    grid.appendChild(e);
+  }
+})();
+
+/* stocks widget */
+(function buildStocks(){
+  const list = document.getElementById('stockList');
+  if(!list) return;
+  const data = [
+    {n:'NIFTY 50', v:'24,812', c:'+0.62%', up:true},
+    {n:'SENSEX', v:'81,440', c:'+0.48%', up:true},
+    {n:'USD/INR', v:'83.21', c:'-0.11%', up:false},
+  ];
+  data.forEach(s=>{
+    const row = document.createElement('div'); row.className='stock-row';
+    row.innerHTML = `<span>${s.n}</span><span>${s.v}</span><span class="${s.up?'stock-up':'stock-down'}">${s.c}</span>`;
+    list.appendChild(row);
+  });
+})();
+
+/* start menu content */
+const pinnedApps = [
+  {ico:'📁',bg:'linear-gradient(135deg,#3a7bd5,#2a5298)',label:'Explorer',win:'explorer'},
+  {ico:'🌐',bg:'linear-gradient(135deg,#22b3a4,#0e7c8c)',label:'Edge',win:'browser'},
+  {ico:'✉',bg:'linear-gradient(135deg,#4a90d9,#2563eb)',label:'Mail',win:'mail'},
+  {ico:'📅',bg:'linear-gradient(135deg,#e5484d,#c2293a)',label:'Calendar',win:'calendar'},
+  {ico:'🎵',bg:'linear-gradient(135deg,#e85d9e,#b83280)',label:'Music',win:'music'},
+  {ico:'🖼',bg:'linear-gradient(135deg,#f6c453,#f08a3c)',label:'Photos',win:'photos'},
+  {ico:'⚙',bg:'linear-gradient(135deg,#5B8CFF,#9B6BFF)',label:'Settings',win:'settings'},
+  {ico:'🛍',bg:'linear-gradient(135deg,#8b5cf6,#6d28d9)',label:'Store',win:'store'},
+  {ico:'📝',bg:'linear-gradient(135deg,#f6c453,#f08a3c)',label:'Notes',win:'notes'},
+  {ico:'🧮',bg:'linear-gradient(135deg,#6b7280,#374151)',label:'Calculator',win:'calc'},
+  {ico:'🎮',bg:'linear-gradient(135deg,#16a34a,#15803d)',label:'Game Hub',win:'games'},
+  {ico:'✦',bg:'linear-gradient(135deg,#5B8CFF,#9B6BFF)',label:'Copilot',win:'copilot'},
+];
+const pinnedGrid = document.getElementById('pinnedGrid');
+pinnedApps.forEach(a=>{
+  const d = document.createElement('div'); d.className='pin-app'; d.dataset.label=a.label.toLowerCase();
+  d.onclick = ()=>{ openWindow(a.win); closeAllOverlays(); };
+  d.innerHTML = `<div class="ico" style="background:${a.bg}">${a.ico}</div><div class="lbl">${a.label}</div>`;
+  pinnedGrid.appendChild(d);
+});
+
+const recItems = [
+  {ico:'📄',bg:'linear-gradient(135deg,#4a90d9,#2563eb)',t:'Q3 roadmap.docx',s:'Edited 2 hours ago'},
+  {ico:'🖼',bg:'linear-gradient(135deg,#f6c453,#f08a3c)',t:'sunset_lake.png',s:'Added yesterday'},
+  {ico:'📊',bg:'linear-gradient(135deg,#22b3a4,#0e7c8c)',t:'Budget tracker.xlsx',s:'Edited 2 days ago'},
+];
+const recList = document.getElementById('recList');
+recItems.forEach(r=>{
+  const d = document.createElement('div'); d.className='rec-item'; d.dataset.label=r.t.toLowerCase();
+  d.onclick = ()=>{ toast(r.t, 'This would open the file in its app.'); closeAllOverlays(); };
+  d.innerHTML = `<div class="ico" style="background:${r.bg}">${r.ico}</div><div class="meta"><div class="t">${r.t}</div><div class="s">${r.s}</div></div>`;
+  recList.appendChild(d);
+});
+
+function filterStart(q){
+  q = q.toLowerCase().trim();
+  document.querySelectorAll('.pin-app').forEach(el=>{
+    el.style.display = (!q || el.dataset.label.includes(q)) ? '' : 'none';
+  });
+  document.querySelectorAll('.rec-item').forEach(el=>{
+    el.style.display = (!q || el.dataset.label.includes(q)) ? '' : 'none';
+  });
+}
+
+function toggleTile(el, name){
+  el.classList.toggle('on');
+  toast(name, (el.classList.contains('on') ? 'Turned on' : 'Turned off') + '.');
+}
+
+/* toast notifications */
+function toast(title, msg){
+  const t = document.createElement('div'); t.className='toast';
+  t.innerHTML = `<div class="ti">✦</div><div><div class="tt">${title}</div><div class="ts">${msg}</div></div>`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 3600);
+}
+
+/* window manager */
+const winDefs = {
+  explorer: {title:'File Explorer', icon:'📁', w:560, h:400, body:`<h3>This PC</h3><p>Desktop, Documents, Downloads, Pictures, and Music would be listed here as a folder grid, with quick access pinned at the top — same bones as before, rendered in the new glass surface style.</p>`},
+  browser: {title:'Edge', icon:'🌐', w:640, h:440, body:`<h3>New tab</h3><p>An address bar, vertical tab strip, and AI sidebar would live here. This concept focuses on the shell, not a working browser engine.</p>`},
+  mail: {title:'Mail', icon:'✉', w:600, h:420, body:`<h3>Inbox</h3><p>Your message list would render here with a reading pane on the right and quick-reply suggestions powered by the on-device assistant.</p>`},
+  settings: {title:'Settings', icon:'⚙', w:640, h:460, body:`<h3>System</h3><p>Display, sound, notifications, power, storage, and accessibility would each get their own page here, reached from a left-hand navigation rail.</p><p style="margin-top:10px;">This concept's whole shell — taskbar, Start, widgets, quick settings — is the visual language Settings itself would extend.</p>`},
+  photos: {title:'Photos', icon:'🖼', w:560, h:400, body:`<h3>Gallery</h3><p>A masonry grid of your library, grouped by date and place, with on-device tagging surfaced as filter chips up top.</p>`},
+  store: {title:'Store', icon:'🛍', w:560, h:400, body:`<h3>Discover</h3><p>Featured apps and games would be presented in large editorial cards here, with your installed apps and updates one tab over.</p>`},
+  copilot: {title:'Copilot', icon:'✦', w:380, h:480, body:`<h3>Ask anything</h3><p>This panel would hold a running chat with the on-device assistant — drafting text, adjusting settings, and finding files by description rather than by name.</p>`},
+  calendar: {title:'Calendar', icon:'📅', w:560, h:420, body:`<h3>This week</h3><p>A week-view grid of your events would render here, with weather and travel time woven into each entry.</p>`},
+  music: {title:'Music', icon:'🎵', w:480, h:380, body:`<h3>Now playing</h3><p>Playback controls and a queue would sit here, with ambient color drawn from the album art behind the glass surface.</p>`},
+  notes: {title:'Sticky Notes', icon:'📝', w:340, h:300, body:`<h3>Untitled note</h3><p style="color:var(--text-primary);">Click to start typing — notes would sync across your devices automatically.</p>`},
+  calc: {title:'Calculator', icon:'🧮', w:300, h:380, body:`<h3>Standard</h3><p>A numeric keypad and running display would fill this window — kept intentionally simple in this concept.</p>`},
+  games: {title:'Game Hub', icon:'🎮', w:560, h:400, body:`<h3>Your library</h3><p>Installed games, achievements, and friend activity would appear here in a unified hub.</p>`},
+  recycle: {title:'Recycle Bin', icon:'🗑', w:480, h:340, body:`<h3>Empty</h3><p>Deleted files would appear here until permanently removed.</p>`},
+};
+const openWins = {};
+
+function openWindow(key){
+  if(openWins[key]){ bringToFront(openWins[key]); return; }
+  const def = winDefs[key]; if(!def) return;
+  const layer = document.getElementById('windows-layer');
+  const el = document.createElement('div'); el.className='win';
+  const left = 60 + Object.keys(openWins).length*36;
+  const top = 50 + Object.keys(openWins).length*30;
+  el.style.left = left+'px'; el.style.top = top+'px';
+  el.style.width = def.w+'px'; el.style.height = def.h+'px';
+  el.style.zIndex = ++zTop;
+  el.innerHTML = `
+    <div class="win-titlebar" data-drag>
+      <div class="win-title">${def.icon} ${def.title}</div>
+      <div class="win-controls">
+        <div class="win-ctrl-btn" data-act="min">—</div>
+        <div class="win-ctrl-btn" data-act="max">▢</div>
+        <div class="win-ctrl-btn close" data-act="close">✕</div>
+      </div>
+    </div>
+    <div class="win-body">${def.body}</div>
+  `;
+  layer.appendChild(el);
+  openWins[key] = el;
+  el.addEventListener('mousedown', ()=>bringToFront(el));
+  makeDraggable(el);
+  el.querySelector('[data-act="close"]').onclick = (e)=>{ e.stopPropagation(); el.remove(); delete openWins[key]; };
+  el.querySelector('[data-act="min"]').onclick = (e)=>{ e.stopPropagation(); el.style.display='none'; setTimeout(()=>{el.style.display='flex';},1400); toast(def.title,'Minimized — this concept restores it automatically after a moment.'); };
+  el.querySelector('[data-act="max"]').onclick = (e)=>{
+    e.stopPropagation();
+    if(el.dataset.maxed==='1'){
+      el.style.width=def.w+'px'; el.style.height=def.h+'px'; el.style.left=left+'px'; el.style.top=top+'px'; el.dataset.maxed='0';
+      el.classList.remove('snapped-left','snapped-right');
+    } else {
+      el.style.left='14px'; el.style.top='14px'; el.style.width='calc(100vw - 28px)'; el.style.height='calc(100vh - 100px)'; el.dataset.maxed='1';
+      el.classList.remove('snapped-left','snapped-right');
+    }
+  };
+}
+function bringToFront(el){ el.style.zIndex = ++zTop; }
+
+function makeDraggable(el){
+  const handle = el.querySelector('[data-drag]');
+  let sx=0, sy=0, ox=0, oy=0, dragging=false;
+  handle.addEventListener('mousedown', (e)=>{
+    if(e.target.closest('.win-ctrl-btn')) return;
+    dragging = true; sx = e.clientX; sy = e.clientY;
+    const rect = el.getBoundingClientRect(); ox = rect.left; oy = rect.top;
+    el.classList.remove('snapped-left','snapped-right');
+    document.body.style.userSelect='none';
+  });
+  window.addEventListener('mousemove', (e)=>{
+    if(!dragging) return;
+    const nx = ox + (e.clientX - sx); const ny = oy + (e.clientY - sy);
+    el.style.left = nx+'px'; el.style.top = Math.max(0,ny)+'px';
+    el.style.right='auto';
+    const sl = document.getElementById('snapLeft'), sr = document.getElementById('snapRight');
+    if(e.clientX < 36){ sl.style.display='flex'; sl.style.top='14px'; sl.style.width='calc(50vw - 21px)'; sl.style.height='calc(100vh - 100px)'; sl.textContent='Snap left'; }
+    else sl.style.display='none';
+    if(e.clientX > window.innerWidth - 36){ sr.style.display='flex'; sr.style.top='14px'; sr.style.width='calc(50vw - 21px)'; sr.style.height='calc(100vh - 100px)'; sr.textContent='Snap right'; }
+    else sr.style.display='none';
+  });
+  window.addEventListener('mouseup', (e)=>{
+    if(!dragging) return;
+    dragging = false; document.body.style.userSelect='';
+    if(e.clientX < 36){ el.classList.add('snapped-left'); }
+    else if(e.clientX > window.innerWidth - 36){ el.classList.add('snapped-right'); }
+    document.getElementById('snapLeft').style.display='none';
+    document.getElementById('snapRight').style.display='none';
+  });
+}
+
+setTimeout(()=>{ openWindow('explorer'); }, 400);
+setTimeout(()=>{
+  const hb = document.getElementById('hintBanner');
+  hb.style.transition='opacity .6s'; hb.style.opacity='0';
+  setTimeout(()=>hb.remove(), 700);
+}, 7000);
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape') closeAllOverlays();
+});
+</script>
+</body>
+</html>
